@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <pattern id="g" width="64" height="64" patternUnits="userSpaceOnUse">
+      <path d="M64 0H0V64" fill="none" stroke="#e8f1ec" stroke-opacity=".14" stroke-width="3"/>
+    </pattern>
+  </defs>
+  <rect width="512" height="512" fill="#1d5a4f"/>
+  <rect width="512" height="512" fill="url(#g)"/>
+  <g transform="rotate(-6 250 260)">
+    <rect x="96" y="104" width="300" height="300" rx="10" fill="#000" opacity=".22" transform="translate(6 12)"/>
+    <rect x="96" y="104" width="300" height="300" rx="10" fill="#fafaf5"/>
+    <path d="M276 318 C292 352 318 372 356 368" fill="none" stroke="#4fb4e0" stroke-width="15" stroke-linecap="round" stroke-dasharray="1 28"/>
+    <path d="M136 330 C150 230 230 196 272 300" fill="none" stroke="#2b2d31" stroke-width="16" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(330 250) rotate(40)">
+    <rect x="-26" y="-190" width="52" height="34" rx="8" fill="#e98b82"/>
+    <rect x="-26" y="-160" width="52" height="22" fill="#aebbb5"/>
+    <rect x="-26" y="-140" width="52" height="150" fill="#f4c02e"/>
+    <rect x="8" y="-140" width="18" height="150" fill="#000" opacity=".12"/>
+    <path d="M-26 10 L26 10 L0 74 Z" fill="#e7cba0"/>
+    <path d="M-9 52 L9 52 L0 74 Z" fill="#2b2d31"/>
+  </g>
+</svg>

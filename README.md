@@ -6,6 +6,8 @@ Aplikasi belajar menggambar langkah demi langkah untuk anak SD dan SMP. Garis bi
 
 Buka `index.html` di browser, di HP atau komputer. Tidak perlu instalasi atau internet; semuanya ada dalam satu file.
 
+Di HP, buka lewat GitHub Pages lalu pilih **Tambahkan ke Layar Utama** supaya muncul sebagai aplikasi dengan ikon pensil.
+
 ## Fitur
 
 - **2 jenjang, 12 kategori, 144 gambar.** Tiap kategori berisi 12 gambar.
@@ -44,6 +46,7 @@ Buka `index.html` di browser, di HP atau komputer. Tidak perlu instalasi atau in
 | `src/data.js` | Semua gambar: koordinat garis, langkah, dan instruksinya (ruang 320 × 320). |
 | `src/shell.html` | Tampilan dan logika aplikasi, dengan penanda `/*DATA*/`. |
 | `build.py` | Menggabungkan `src/` menjadi `index.html`. |
+| `icons/`, `manifest.webmanifest` | Ikon aplikasi dan data untuk memasangnya di layar utama HP. |
 
 ## Menambah atau mengubah gambar
 

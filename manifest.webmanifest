@@ -1,0 +1,18 @@
+{
+  "name": "Garis demi Garis",
+  "short_name": "Garis demi Garis",
+  "description": "Belajar menggambar langkah demi langkah untuk anak SD dan SMP.",
+  "lang": "id",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1d5a4f",
+  "theme_color": "#1d5a4f",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
