@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Garis demi Garis</title>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=Shantell+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Alas potong hijau sebagai meja kerja. Beranda: pilih jenjang lalu kategori.
+     Galeri: 12 kertas kecil. Menggambar: kertas di tengah, penggaris langkah, lalu dok tombol. */
+  --mat:#1d5a4f;
+  --mat-deep:#174a41;
+  --mat-ink:#e8f1ec;
+  --mat-dim:#b3d0c5;
+  --paper:#fafaf5;
+  --sketch:#f5efe1;
+  --graphite:#2b2d31;
+  --blue:#4fb4e0;
+  --pencil:#f4c02e;
+  --eraser:#e98b82;
+  --wood:#e7cba0;
+  --ferrule:#aebbb5;
+  --mat-line:rgba(232,241,236,.07);
+  --mat-line-strong:rgba(232,241,236,.13);
+  --edge:rgba(232,241,236,.34);
+  --card:rgba(18,64,56,.72);
+  --display:"Shantell Sans","Comic Neue","Trebuchet MS",sans-serif;
+  --body:"Hanken Grotesk","Segoe UI",system-ui,-apple-system,sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%;margin:0}
+body{
+  background-color:var(--mat);
+  background-image:
+    linear-gradient(var(--mat-line-strong) 1px,transparent 1px),
+    linear-gradient(90deg,var(--mat-line-strong) 1px,transparent 1px),
+    linear-gradient(var(--mat-line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--mat-line) 1px,transparent 1px);
+  background-size:80px 80px,80px 80px,16px 16px,16px 16px;
+  color:var(--mat-ink);
+  font:500 15px/1.4 var(--body);
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;user-select:none;
+  overscroll-behavior:none;
+}
+button{font-family:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:2.5px solid var(--mat-ink);outline-offset:3px}
+svg{display:block}
+
+/* layar */
+.screen{height:100%;max-width:620px;margin:0 auto}
+.screen.on{animation:enter .32s cubic-bezier(.2,.8,.2,1)}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.scroll{overflow-y:auto;overscroll-behavior:contain}
+.pad{padding:14px 16px 28px;display:grid;gap:14px;align-content:start}
+
+/* kepala umum */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mark{margin:0;font:800 23px/1.15 var(--display);letter-spacing:-.01em;color:var(--mat-dim)}
+.mark span{color:var(--mat-ink);border-bottom:3px solid var(--blue)}
+.mark span + span{border-bottom-color:var(--pencil)}
+.top-right{display:flex;align-items:center;gap:8px}
+.starpill{
+  display:inline-flex;align-items:center;gap:5px;height:34px;padding:0 12px 0 9px;border-radius:999px;
+  background:var(--card);border:1.5px solid var(--edge);font:700 15px/1 var(--body);font-variant-numeric:tabular-nums;
+}
+.starpill svg{width:18px;height:18px;color:var(--pencil)}
+.starpill.bump{animation:bump .5s}
+@keyframes bump{40%{transform:scale(1.18)}}
+.iconbtn{
+  flex:none;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;
+  border:1.5px solid var(--edge);background:var(--card);
+}
+.iconbtn svg{width:20px;height:20px}
+.iconbtn:active{transform:scale(.94)}
+
+/* jenjang */
+.levels{position:relative;display:grid;grid-template-columns:1fr 1fr;padding:4px;border-radius:18px;background:var(--card);border:1.5px solid var(--edge)}
+.levels::before{
+  content:"";position:absolute;top:4px;bottom:4px;left:4px;width:calc(50% - 4px);border-radius:14px;
+  background:var(--paper);box-shadow:0 3px 0 rgba(0,0,0,.25);transition:transform .35s cubic-bezier(.3,1.4,.5,1);
+}
+.levels.smp::before{transform:translateX(100%);background:var(--sketch)}
+.levels button{
+  position:relative;z-index:1;display:grid;justify-items:center;gap:2px;padding:10px 6px;border:0;background:none;
+  color:var(--mat-ink);transition:color .2s;
+}
+.levels button b{font:800 26px/1 var(--display)}
+.levels button small{font:600 12px/1.2 var(--body);opacity:.85}
+.levels button[aria-selected="true"]{color:var(--graphite)}
+.lvl-desc{margin:-4px 2px 0;color:var(--mat-dim);font-size:14px;text-wrap:pretty}
+
+/* lanjutkan */
+.cont{
+  display:flex;align-items:center;gap:12px;width:100%;padding:10px 14px 10px 10px;border-radius:16px;
+  border:0;background:var(--pencil);color:var(--graphite);text-align:left;box-shadow:0 4px 0 #b88c12;
+}
+.cont:active{transform:translateY(2px);box-shadow:0 2px 0 #b88c12}
+.cont canvas{flex:none;width:52px;height:52px;border-radius:6px;background:var(--paper)}
+.cont span{flex:1;min-width:0;display:grid}
+.cont small{font:700 11px/1.3 var(--body);letter-spacing:.06em;text-transform:uppercase;opacity:.75}
+.cont strong{font:800 19px/1.15 var(--display)}
+.cont i{flex:none;width:34px;height:34px;border-radius:50%;background:var(--graphite);display:grid;place-items:center}
+.cont i svg{width:16px;height:16px;color:var(--pencil)}
+
+/* kartu kategori */
+.cats{display:grid;gap:12px}
+.cat{
+  display:flex;align-items:center;gap:16px;width:100%;padding:14px 16px 14px 14px;border-radius:18px;
+  background:var(--card);border:1.5px solid var(--edge);text-align:left;transition:transform .15s;
+}
+.cat:active{transform:scale(.98)}
+.collage{position:relative;flex:none;width:96px;height:78px}
+.collage canvas{position:absolute;width:54px;height:54px;border-radius:4px;background:var(--paper);box-shadow:0 3px 6px rgba(0,0,0,.3);transition:transform .3s}
+.collage canvas:nth-child(1){left:0;top:14px;transform:rotate(-9deg)}
+.collage canvas:nth-child(2){left:22px;top:2px;transform:rotate(3deg);z-index:1}
+.collage canvas:nth-child(3){left:42px;top:18px;transform:rotate(11deg);z-index:2}
+.cat:hover .collage canvas:nth-child(1){transform:rotate(-14deg) translateX(-4px)}
+.cat:hover .collage canvas:nth-child(3){transform:rotate(16deg) translateX(4px)}
+.smp-on .collage canvas{background:var(--sketch)}
+.cat-body{flex:1;min-width:0;display:grid;gap:6px}
+.cat-body h3{margin:0;font:800 19px/1.15 var(--display)}
+.cat-meta{display:flex;justify-content:space-between;gap:8px;font:600 12.5px/1.2 var(--body);color:var(--mat-dim);font-variant-numeric:tabular-nums}
+.cat-meta span:last-child{display:inline-flex;align-items:center;gap:3px}
+.cat-meta svg{width:13px;height:13px;color:var(--pencil)}
+.bar{height:8px;border-radius:99px;background:rgba(0,0,0,.25);overflow:hidden}
+.bar i{display:block;height:100%;width:0;border-radius:99px;background:var(--pencil);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+
+/* galeri */
+.ghead{display:flex;align-items:center;gap:12px}
+.ghead div{flex:1;min-width:0}
+.ghead small{display:block;font:700 11px/1.3 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--mat-dim)}
+.ghead h2{margin:0;font:800 24px/1.1 var(--display)}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:0 -16px;padding:3px 16px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{
+  flex:none;min-height:38px;padding:0 13px;border:1.5px solid var(--edge);border-radius:999px;
+  background:var(--card);font:600 13.5px/1 var(--body);
+}
+.tabs button[aria-selected="true"]{background:var(--mat-ink);border-color:var(--mat-ink);color:var(--mat-deep)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 12px}
+@media (min-width:540px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.card{
+  position:relative;display:grid;gap:3px;justify-items:start;align-content:start;padding:0;border:0;background:none;text-align:left;
+  animation:pop .4s cubic-bezier(.3,1.4,.5,1) backwards;
+}
+@keyframes pop{from{opacity:0;transform:scale(.85) rotate(-3deg)}}
+.card canvas{
+  display:block;width:100%;aspect-ratio:1;margin-bottom:4px;border-radius:4px;background:var(--paper);
+  box-shadow:0 3px 0 rgba(0,0,0,.22);transition:transform .2s;
+}
+.smp-on .card canvas{background:var(--sketch)}
+.card:hover canvas{transform:rotate(-2deg) translateY(-2px)}
+.card:active canvas{transform:scale(.95)}
+.card b{font:700 14px/1.2 var(--body);overflow-wrap:anywhere}
+.card small{font:500 12px/1.2 var(--body);color:var(--mat-dim)}
+.card[aria-current="true"] canvas{outline:3px solid var(--pencil);outline-offset:2px}
+.mini{display:flex;gap:1px}
+.mini svg{width:13px;height:13px;color:rgba(232,241,236,.25)}
+.mini svg.on{color:var(--pencil)}
+
+/* layar menggambar */
+.draw{display:grid;grid-template-rows:auto minmax(200px,1fr) auto auto;gap:10px;padding:10px 16px 14px}
+.dtop{display:flex;align-items:center;gap:10px}
+.dtitle{flex:1;min-width:0;display:grid}
+.dtitle small{font:700 11px/1.3 var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--mat-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dtitle strong{font:800 20px/1.1 var(--display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mode{display:flex;flex:none;border:1.5px solid var(--edge);border-radius:999px;padding:2px;background:var(--card)}
+.mode button{min-height:32px;padding:0 11px;border:0;border-radius:999px;background:none;color:var(--mat-dim);font:600 13px/1 var(--body)}
+.mode button[aria-pressed="true"]{background:var(--mat-ink);color:var(--mat-deep)}
+
+.stage{position:relative;min-height:0;display:grid;place-items:center}
+.paper{
+  position:relative;width:300px;height:300px;border-radius:2px;
+  background:var(--paper) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .2 0 0 0 0 .2 0 0 0 .1 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  box-shadow:0 12px 26px -10px rgba(0,0,0,.5),0 2px 4px rgba(0,0,0,.25);
+  touch-action:none;-webkit-touch-callout:none;cursor:crosshair;transition:transform .3s;
+}
+.paper.cheer{animation:cheer .6s}
+@keyframes cheer{30%{transform:rotate(-1.5deg) scale(1.02)}60%{transform:rotate(1deg)}}
+.paper.smp{background-color:var(--sketch)}
+.paper canvas{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.paper::before,.paper::after{
+  content:"";position:absolute;top:8px;width:58px;height:17px;z-index:3;pointer-events:none;
+  background:rgba(240,226,170,.86);box-shadow:0 1px 2px rgba(0,0,0,.22);
+}
+.paper::before{left:-12px;transform:rotate(-38deg)}
+.paper::after{right:-12px;transform:rotate(38deg)}
+.paper.smp::before{
+  left:10px;right:10px;top:-10px;width:auto;height:20px;transform:none;box-shadow:none;
+  background:radial-gradient(circle at 9px 10px,transparent 3.5px,#c9d1cd 4px,#8f9a96 6px,transparent 6.5px) 0 0/22px 20px repeat-x;
+}
+.paper.smp::after{display:none}
+.paper.is-kertas{cursor:default}
+.paper.is-kertas #ink,.paper.is-kertas #live{display:none}
+.paper.coloring{cursor:pointer}
+.paper.coloring #live{display:block}
+
+.toast{
+  position:absolute;left:50%;bottom:6%;z-index:4;padding:8px 16px;border-radius:999px;pointer-events:none;
+  background:var(--graphite);color:var(--pencil);font:800 18px/1 var(--display);box-shadow:0 6px 16px rgba(0,0,0,.35);
+  opacity:0;transform:translate(-50%,10px) scale(.8);
+}
+.toast.show{animation:toast 1.1s cubic-bezier(.3,1.4,.5,1)}
+@keyframes toast{15%{opacity:1;transform:translate(-50%,0) scale(1.06)}25%{transform:translate(-50%,0) scale(1)}80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-8px)}}
+
+/* penggaris langkah */
+.ruler{
+  list-style:none;margin:0;padding:0;display:flex;height:28px;
+  border-top:1.5px solid var(--mat-dim);border-right:1.5px solid var(--mat-dim);
+}
+.ruler li{
+  flex:1;position:relative;border-left:1.5px solid var(--mat-dim);
+  background:repeating-linear-gradient(90deg,transparent 0 calc(25% - 1px),rgba(179,208,197,.6) calc(25% - 1px) 25%) top left/100% 8px no-repeat;
+  color:var(--mat-dim);font:600 11px/1 var(--body);font-variant-numeric:tabular-nums;
+}
+.ruler i{position:absolute;left:0;top:0;height:5px;width:0;background:var(--pencil);transition:width .18s ease-out}
+.ruler b{position:absolute;left:5px;bottom:3px;font-weight:600}
+.ruler .past b{color:var(--mat-ink)}
+.ruler .now b{color:var(--pencil);font-weight:700}
+.ruler .k-bantu i{background:var(--blue)}
+.ruler .k-arsir i{background:repeating-linear-gradient(-45deg,var(--pencil) 0 3px,#c99a10 3px 5px)}
+
+/* dok bawah */
+.dock{display:grid;gap:10px;min-height:150px;align-content:start}
+.brief{display:grid;gap:4px;align-content:start}
+.kick{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kicker{margin:0;font:600 11px/1.3 var(--body);letter-spacing:.05em;text-transform:uppercase;color:var(--mat-dim)}
+.tech{display:inline-flex;align-items:center;gap:5px;height:22px;padding:0 9px;border-radius:99px;font:700 11.5px/1 var(--body);background:var(--mat-ink);color:var(--mat-deep)}
+.tech::before{content:"";width:14px;height:3px;border-radius:2px;background:var(--graphite)}
+.tech.bantu{background:#d4ecf7}
+.tech.bantu::before{height:0;border-top:2px dashed #3b8fb5;background:none}
+.tech.arsir{background:#fbe7a6}
+.tech.arsir::before{height:10px;width:14px;background:repeating-linear-gradient(-45deg,var(--graphite) 0 1.5px,transparent 1.5px 4px)}
+.brief h2{margin:0;font:600 20px/1.25 var(--display);text-wrap:balance;animation:enter .3s}
+.hint{margin:0;font-size:13.5px;color:var(--mat-dim)}
+.controls{display:flex;align-items:center;gap:8px;min-height:46px}
+.ghost{
+  height:44px;padding:0 13px;border:1.5px solid var(--edge);border-radius:12px;
+  background:var(--card);font:600 14px/1 var(--body);display:inline-flex;align-items:center;gap:7px;
+}
+.ghost svg{width:17px;height:17px}
+.ghost:active:not(:disabled){transform:scale(.96);background:var(--mat-deep)}
+.ghost:disabled{opacity:.4;cursor:default}
+.push{margin-left:auto}
+.pencil{
+  position:relative;height:46px;margin-right:24px;padding:0 16px 0 38px;border:0;border-radius:6px 0 0 6px;
+  background:linear-gradient(180deg,color-mix(in srgb,var(--pencil) 78%,white) 0 30%,var(--pencil) 30% 70%,color-mix(in srgb,var(--pencil) 86%,black) 70%);
+  color:var(--graphite);font:700 15px/1 var(--body);white-space:nowrap;
+}
+.pencil::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:26px;border-radius:6px 0 0 6px;
+  background:linear-gradient(90deg,var(--eraser) 0 15px,var(--ferrule) 15px);
+}
+.pencil::after{
+  content:"";position:absolute;left:100%;top:0;bottom:0;width:24px;
+  background:linear-gradient(90deg,var(--wood) 0 62%,var(--graphite) 62%);
+  clip-path:polygon(0 0,100% 50%,0 100%);
+}
+.pencil:active{filter:brightness(.94);transform:translateX(3px)}
+
+/* panel selesai */
+.finish{display:grid;gap:10px;padding:12px 14px;border-radius:18px;background:var(--card);border:1.5px solid var(--edge);animation:enter .35s}
+.fhead{display:flex;align-items:center;gap:14px}
+.bigstars{display:flex;gap:2px;flex:none}
+.bigstars button,.bigstars span{padding:0;border:0;background:none;display:block}
+.bigstars svg{width:34px;height:34px;color:rgba(232,241,236,.22);transition:color .2s}
+.bigstars .on svg{color:var(--pencil);animation:starpop .5s cubic-bezier(.3,1.6,.5,1) backwards;filter:drop-shadow(0 2px 0 #b88c12)}
+.bigstars .on:nth-child(2) svg{animation-delay:.15s}
+.bigstars .on:nth-child(3) svg{animation-delay:.3s}
+@keyframes starpop{from{transform:scale(0) rotate(-60deg)}}
+.ftext{min-width:0;display:grid;gap:2px}
+.ftext strong{font:800 20px/1.15 var(--display)}
+.ftext small{font-size:13px;color:var(--mat-dim)}
+.frow{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.frow .ghost{padding:0 10px;font-size:13.5px}
+
+/* panel mewarnai */
+.colorbar{display:grid;gap:10px;animation:enter .3s}
+.crayons{display:flex;gap:6px;overflow-x:auto;margin:0 -16px;padding:10px 16px 4px;scrollbar-width:none}
+.crayons::-webkit-scrollbar{display:none}
+.crayon{
+  flex:none;position:relative;width:30px;height:58px;border:0;padding:0;border-radius:4px 4px 3px 3px;background:var(--c);
+  box-shadow:inset -6px 0 0 rgba(0,0,0,.14),inset 0 -10px 0 rgba(0,0,0,.12);transition:transform .2s cubic-bezier(.3,1.5,.5,1);transform:translateY(8px);
+}
+.crayon::before{content:"";position:absolute;left:3px;right:3px;top:-11px;height:12px;background:var(--c);clip-path:polygon(25% 0,75% 0,100% 100%,0 100%);filter:brightness(.9)}
+.crayon::after{content:"";position:absolute;left:0;right:0;top:22px;height:6px;background:rgba(255,255,255,.35)}
+.crayon[aria-pressed="true"]{transform:translateY(-6px)}
+.crayon.erase{--c:#f2ede4;background:repeating-linear-gradient(45deg,#f6d6d2 0 5px,#f2ede4 5px 10px)}
+.crayon.erase::before{background:var(--eraser);clip-path:none;border-radius:4px 4px 0 0}
+
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
+
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-star" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2.3l2.95 6.2 6.75.8-5 4.65 1.33 6.75L12 17.4l-6.03 3.3 1.33-6.75-5-4.65 6.75-.8z"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-go" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5m0-5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-undo" viewBox="0 0 24 24"><path d="M9 7L4.5 11.5 9 16M5 11.5h9a5 5 0 0 1 0 10h-2" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></symbol>
+  <symbol id="i-brush" viewBox="0 0 24 24"><path d="M14.5 4.5l5 5-7.5 7.5-5-5z" fill="currentColor"/><path d="M6 13.5c-2 0-3 1.5-3 3.5 0 1.5-.5 2.5-1 3 3 .5 7-.5 7-3.5z" fill="currentColor"/></symbol>
+  <symbol id="i-redo" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v4h-4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<!-- BERANDA -->
+<section class="screen scroll" id="screen-home">
+  <div class="pad">
+    <header class="top">
+      <h1 class="mark"><span>Garis</span> demi <span>Garis</span></h1>
+      <div class="top-right">
+        <span class="starpill" id="star-total" aria-label="Jumlah bintang"><svg><use href="#i-star"/></svg><b>0</b></span>
+        <button type="button" class="iconbtn" id="btn-sound" aria-pressed="true" aria-label="Suara"><svg><use href="#i-sound"/></svg></button>
+      </div>
+    </header>
+    <div class="levels" id="levels" role="tablist" aria-label="Jenjang">
+      <button type="button" role="tab" id="lvl-sd" aria-selected="true"><b>SD</b><small>Garis sederhana</small></button>
+      <button type="button" role="tab" id="lvl-smp" aria-selected="false"><b>SMP</b><small>Garis bantu &amp; arsir</small></button>
+    </div>
+    <p class="lvl-desc" id="lvl-desc"></p>
+    <button type="button" class="cont" id="cont" hidden>
+      <canvas id="cont-thumb" aria-hidden="true"></canvas>
+      <span><small id="cont-label">Lanjutkan</small><strong id="cont-name"></strong></span>
+      <i><svg><use href="#i-go"/></svg></i>
+    </button>
+    <div class="cats" id="cats"></div>
+  </div>
+</section>
+
+<!-- GALERI -->
+<section class="screen scroll" id="screen-gallery" hidden>
+  <div class="pad">
+    <header class="ghead">
+      <button type="button" class="iconbtn" id="gal-back" aria-label="Kembali ke beranda"><svg><use href="#i-back"/></svg></button>
+      <div><small id="gal-sub"></small><h2 id="gal-title"></h2></div>
+      <span class="starpill" id="gal-stars"><svg><use href="#i-star"/></svg><b>0</b></span>
+    </header>
+    <div class="tabs" id="tabs" role="tablist" aria-label="Kategori"></div>
+    <div class="grid" id="grid"></div>
+  </div>
+</section>
+
+<!-- MENGGAMBAR -->
+<main class="screen draw" id="screen-draw" hidden>
+  <header class="dtop">
+    <button type="button" class="iconbtn" id="btn-back" aria-label="Kembali ke galeri"><svg><use href="#i-back"/></svg></button>
+    <div class="dtitle"><small id="draw-sub"></small><strong id="draw-title"></strong></div>
+    <div class="mode" role="group" aria-label="Tempat menggambar">
+      <button type="button" id="mode-layar" aria-pressed="true">Layar</button>
+      <button type="button" id="mode-kertas" aria-pressed="false">Kertas</button>
+    </div>
+  </header>
+
+  <div class="stage" id="stage">
+    <div class="paper" id="paper">
+      <canvas id="color" width="640" height="640" aria-hidden="true"></canvas>
+      <canvas id="guide" aria-hidden="true"></canvas>
+      <canvas id="ink" aria-hidden="true"></canvas>
+      <canvas id="live" role="img" aria-label="Kertas gambar. Telusuri garis biru dengan jari atau mouse."></canvas>
+    </div>
+    <div class="toast" id="toast" aria-live="polite"></div>
+  </div>
+
+  <ol class="ruler" id="ruler" aria-label="Kemajuan langkah"></ol>
+
+  <div class="dock">
+    <div id="panel-steps">
+      <section class="brief" aria-live="polite">
+        <div class="kick"><p class="kicker" id="kicker"></p><span class="tech" id="tech" hidden></span></div>
+        <h2 id="instruction"></h2>
+        <p class="hint" id="hint"></p>
+      </section>
+      <div class="controls" style="margin-top:10px">
+        <button type="button" class="ghost" id="btn-undo"><svg><use href="#i-undo"/></svg>Urungkan</button>
+        <button type="button" class="ghost" id="btn-replay"><svg><use href="#i-play"/></svg>Contoh</button>
+        <button type="button" class="ghost push" id="btn-skip">Lewati</button>
+        <button type="button" class="pencil push" id="btn-next" hidden>Lanjut</button>
+      </div>
+    </div>
+
+    <section class="finish" id="panel-finish" hidden aria-live="polite">
+      <div class="fhead">
+        <div class="bigstars" id="bigstars"></div>
+        <div class="ftext"><strong id="f-title"></strong><small id="f-sub"></small></div>
+      </div>
+      <div class="frow">
+        <button type="button" class="ghost" id="btn-color"><svg><use href="#i-brush"/></svg>Warnai</button>
+        <button type="button" class="ghost" id="btn-timelapse"><svg><use href="#i-play"/></svg>Putar ulang</button>
+        <button type="button" class="ghost" id="btn-redo"><svg><use href="#i-redo"/></svg>Ulangi</button>
+      </div>
+      <div class="frow"><button type="button" class="pencil push" id="btn-nextlesson">Berikutnya</button></div>
+    </section>
+
+    <section class="colorbar" id="panel-color" hidden>
+      <div class="crayons" id="crayons" role="group" aria-label="Pilih warna"></div>
+      <div class="controls">
+        <button type="button" class="ghost" id="btn-cundo"><svg><use href="#i-undo"/></svg>Urungkan</button>
+        <span class="hint">Ketuk gambar untuk mewarnai.</span>
+        <button type="button" class="pencil push" id="btn-cdone">Selesai</button>
+      </div>
+    </section>
+  </div>
+</main>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script id="core">
+/*DATA*/
+</script>
+
+<script>
+(() => {
+  const { LEVELS, LESSONS, mark, near, fraction, walk, dist } = Core;
+  const $ = id => document.getElementById(id);
+  const token = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const BLUE = token('--blue'), INK = token('--graphite'), YELLOW = token('--pencil');
+  const GRAPH = '#3a3c42', BLUE_L = '#8ccbe8';
+  const DPR = Math.min(window.devicePixelRatio || 1, 3);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const MIN_INK = 30;
+  const STAR = '<svg viewBox="0 0 24 24"><use href="#i-star"/></svg>';
+  const CHEERS = ['Bagus!', 'Mantap!', 'Rapi sekali!', 'Hebat!', 'Keren!', 'Terus!', 'Pas!'];
+  const CRAYONS = [['Merah', '#e2574c'], ['Oranye', '#f39c3d'], ['Kuning', '#f6cf3f'], ['Hijau muda', '#8cc84b'], ['Hijau', '#3f9b5b'],
+    ['Biru muda', '#6cc3ec'], ['Biru', '#3b6fd1'], ['Ungu', '#9b6bd3'], ['Merah muda', '#f29ac2'], ['Cokelat', '#a8703e'], ['Abu', '#9aa0a6']];
+
+  /* ---------- simpanan per perangkat ---------- */
+  const load = () => { try { return JSON.parse(localStorage.getItem('garis-demi-garis-2') || '{}') || {}; } catch { return {}; } };
+  const stored = load();
+  let stars = stored.stars && typeof stored.stars === 'object' ? stored.stars : {};
+  let soundOn = stored.sound !== false;
+  let level = stored.level === 1 ? 1 : 0;
+  let lastId = stored.last || null;
+  const save = () => { try { localStorage.setItem('garis-demi-garis-2', JSON.stringify({ stars, sound: soundOn, level, last: lastId, mode: S.mode })); } catch {} };
+
+  let S = { lesson: 0, mode: stored.mode === 'kertas' ? 'kertas' : 'layar', sessions: {}, screen: 'home', galCat: 0 };
+  let cov = null, k = 1, animT = 1, fade = 0, conAlpha = 1, raf = 0, autoT = 0, eraseRaf = 0, replayRaf = 0;
+  let active = null, cur = null, coloring = false, crayon = CRAYONS[0][1];
+
+  const lesson = () => LESSONS[S.lesson];
+  const sess = () => (S.sessions[lesson().id] ||= { step: 0, done: false, strokes: [] });
+  const totals = () => sess().strokes.reduce((t, s) => (t.n += s.n, t.on += s.on, t), { n: 0, on: 0 });
+  const isSmp = L => L.lvl === 1;
+  const totalStars = () => Object.values(stars).reduce((a, b) => a + (+b || 0), 0);
+  const catLessons = (lv, ci) => LEVELS[lv].cats[ci].items;
+  const starRow = (n, cls = 'mini') => `<span class="${cls}">${[1, 2, 3].map(i => STAR.replace('<svg', `<svg class="${i <= n ? 'on' : ''}"`)).join('')}</span>`;
+
+  /* ---------- suara dan getar ---------- */
+  let actx = null;
+  const beep = notes => {
+    if (!soundOn) return;
+    try {
+      actx ||= new (window.AudioContext || window.webkitAudioContext)();
+      const t0 = actx.currentTime;
+      for (const [f, dt, dur = .13] of notes) {
+        const o = actx.createOscillator(), g = actx.createGain();
+        o.type = 'triangle'; o.frequency.value = f;
+        g.gain.setValueAtTime(0, t0 + dt); g.gain.linearRampToValueAtTime(.16, t0 + dt + .012); g.gain.exponentialRampToValueAtTime(.001, t0 + dt + dur);
+        o.connect(g).connect(actx.destination); o.start(t0 + dt); o.stop(t0 + dt + dur + .03);
+      }
+    } catch {}
+  };
+  const buzz = ms => { try { navigator.vibrate?.(ms); } catch {} };
+
+  /* ---------- kanvas dasar ---------- */
+  const paper = $('paper'), ruler = $('ruler');
+  const coC = $('color'), gC = $('guide'), iC = $('ink'), lC = $('live');
+  const coX = coC.getContext('2d', { willReadFrequently: true }), gX = gC.getContext('2d'), iX = iC.getContext('2d'), lX = lC.getContext('2d');
+  const begin = ctx => {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.setTransform(k, 0, 0, k, 0, 0);
+    ctx.lineCap = ctx.lineJoin = 'round'; ctx.globalAlpha = 1; ctx.setLineDash([]);
+  };
+  const trace = (ctx, st, upto) => {
+    const { pts, cum } = st; let end = pts[0];
+    ctx.beginPath(); ctx.moveTo(end[0], end[1]);
+    for (let i = 1; i < pts.length; i++) {
+      if (cum[i] <= upto) { end = pts[i]; ctx.lineTo(end[0], end[1]); continue; }
+      const seg = cum[i] - cum[i - 1], t = seg ? (upto - cum[i - 1]) / seg : 0;
+      end = [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * t, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * t];
+      ctx.lineTo(end[0], end[1]); break;
+    }
+    ctx.stroke();
+    return end;
+  };
+  const traceStep = (ctx, step, frac) => {
+    if (step.kind === 'arsir') {
+      const n = Math.ceil(step.hatch.length * frac); let head = null;
+      ctx.beginPath();
+      for (let i = 0; i < n; i++) { const [p, q] = step.hatch[i]; ctx.moveTo(p[0], p[1]); ctx.lineTo(q[0], q[1]); head = q; }
+      ctx.stroke();
+      return head;
+    }
+    let budget = step.len * frac, head = null;
+    for (const st of step.strokes) {
+      if (budget <= 0) break;
+      head = trace(ctx, st, Math.min(budget, st.len));
+      budget -= st.len;
+    }
+    return head;
+  };
+  const dot = (ctx, p, r, fill, stroke) => {
+    ctx.beginPath(); ctx.arc(p[0], p[1], r, 0, Math.PI * 2);
+    ctx.fillStyle = fill; ctx.fill();
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = 2.5; ctx.stroke(); }
+  };
+  const thumb = (c, L, cssPx, lw) => {
+    const px = Math.round(cssPx * DPR);
+    c.width = c.height = px;
+    const x = c.getContext('2d');
+    x.setTransform(px / 320, 0, 0, px / 320, 0, 0);
+    x.lineCap = x.lineJoin = 'round';
+    for (const s of L.steps) {
+      if (s.kind === 'bantu') continue;
+      if (s.kind === 'arsir') { x.strokeStyle = '#8b8f96'; x.lineWidth = lw * .3; }
+      else { x.strokeStyle = INK; x.lineWidth = isSmp(L) ? lw * .75 : lw; }
+      traceStep(x, s, 1);
+    }
+  };
+
+  /* ---------- garis contoh ---------- */
+  function styleGuide(ctx, kind, role) {
+    // role: 'prev' (langkah lewat, mode layar), 'ref' (langkah lewat, mode kertas), 'now'
+    ctx.setLineDash([]);
+    if (role === 'now') {
+      ctx.strokeStyle = BLUE; ctx.globalAlpha = 1;
+      if (kind === 'garis') ctx.lineWidth = 5.5;
+      else if (kind === 'bantu') { ctx.lineWidth = 3.4; ctx.setLineDash([8, 7]); }
+      else ctx.lineWidth = 2.2;
+    } else if (role === 'prev') {
+      ctx.strokeStyle = kind === 'bantu' ? BLUE_L : BLUE;
+      if (kind === 'garis') { ctx.lineWidth = 4.5; ctx.globalAlpha *= .24; }
+      else if (kind === 'bantu') { ctx.lineWidth = 2; ctx.globalAlpha *= .45; ctx.setLineDash([6, 6]); }
+      else { ctx.lineWidth = 1.6; ctx.globalAlpha *= .22; }
+    } else {
+      if (kind === 'garis') { ctx.strokeStyle = INK; ctx.lineWidth = isSmp(lesson()) ? 2.6 : 3.2; ctx.globalAlpha *= .92; }
+      else if (kind === 'bantu') { ctx.strokeStyle = '#7d8a94'; ctx.lineWidth = 1.5; ctx.globalAlpha *= .55; ctx.setLineDash([6, 6]); }
+      else { ctx.strokeStyle = GRAPH; ctx.lineWidth = 1.3; ctx.globalAlpha *= .55; }
+    }
+  }
+  function drawGuide() {
+    begin(gX);
+    const L = lesson(), ss = sess(), pm = S.mode === 'kertas';
+    const upto = ss.done ? L.steps.length : ss.step;
+    for (let i = 0; i < upto; i++) {
+      const s = L.steps[i];
+      gX.globalAlpha = ss.done ? (pm ? (s.kind === 'bantu' ? 0 : 1) : .6 * fade) : 1;
+      if (gX.globalAlpha <= 0.001) continue;
+      styleGuide(gX, s.kind, pm ? 'ref' : 'prev');
+      traceStep(gX, s, 1);
+    }
+    gX.globalAlpha = 1; gX.setLineDash([]);
+    if (ss.done) return;
+
+    const step = L.steps[ss.step];
+    if (step.kind === 'arsir') {
+      gX.strokeStyle = BLUE; gX.lineWidth = 1.4; gX.setLineDash([4, 5]); gX.globalAlpha = .8;
+      for (const st of step.strokes) trace(gX, st, st.len);
+      gX.setLineDash([]); gX.globalAlpha = .12; gX.fillStyle = BLUE;
+      for (const a of step.areas) { gX.beginPath(); a.forEach((p, i) => i ? gX.lineTo(p[0], p[1]) : gX.moveTo(p[0], p[1])); gX.fill(); }
+      gX.globalAlpha = 1;
+    }
+    styleGuide(gX, step.kind, 'now');
+    const head = traceStep(gX, step, animT);
+    gX.setLineDash([]);
+    if (animT < 1) { if (head) { dot(gX, head, 6, YELLOW); dot(gX, head, 2, INK); } return; }
+    if (pm || !cov || step.kind === 'arsir') return;
+    for (let i = 0; i < step.ranges.length; i++) {
+      const [a, b] = step.ranges[i]; let c = 0;
+      for (let j = a; j < b; j++) c += cov[j];
+      if (c / (b - a) < .6) { dot(gX, step.strokes[i].pts[0], 5.5, '#fff', BLUE); break; }
+    }
+  }
+
+  /* ---------- tinta pengguna ---------- */
+  function styleInk(ctx, kind, smp) {
+    ctx.globalAlpha = 1;
+    if (kind === 'bantu') { ctx.strokeStyle = ctx.fillStyle = '#6c7a86'; ctx.lineWidth = 1.7; ctx.globalAlpha = .5 * conAlpha; }
+    else if (kind === 'arsir') { ctx.strokeStyle = ctx.fillStyle = GRAPH; ctx.lineWidth = 9; ctx.globalAlpha = .2; }
+    else if (smp) { ctx.strokeStyle = ctx.fillStyle = GRAPH; ctx.lineWidth = 2.7; ctx.globalAlpha = .92; }
+    else { ctx.strokeStyle = ctx.fillStyle = INK; ctx.lineWidth = 3.4; ctx.globalAlpha = .9; }
+  }
+  const inkPath = (ctx, pts, n = pts.length) => {
+    ctx.beginPath();
+    if (n === 1) { ctx.arc(pts[0][0], pts[0][1], ctx.lineWidth / 2, 0, Math.PI * 2); ctx.fill(); return; }
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < n - 1; i++) ctx.quadraticCurveTo(pts[i][0], pts[i][1], (pts[i][0] + pts[i + 1][0]) / 2, (pts[i][1] + pts[i + 1][1]) / 2);
+    const e = pts[n - 1]; ctx.lineTo(e[0], e[1]); ctx.stroke();
+  };
+  function drawInk(limit = Infinity) {
+    begin(iX);
+    const smp = isSmp(lesson()), kinds = lesson().steps;
+    let left = limit;
+    for (const s of sess().strokes) {
+      if (left <= 0) break;
+      const n = Math.min(s.pts.length, left); left -= n;
+      styleInk(iX, kinds[s.step].kind, smp);
+      if (iX.globalAlpha > 0.005) inkPath(iX, s.pts, n);
+    }
+    drawLive();
+  }
+  function drawLive() {
+    begin(lX);
+    if (cur) { styleInk(lX, lesson().steps[cur.step].kind, isSmp(lesson())); inkPath(lX, cur.pts); }
+  }
+  function dropLive() { active = null; cur = null; begin(lX); }
+
+  function resize() {
+    const st = $('stage');
+    if (!st.clientWidth) return;
+    const size = Math.max(200, Math.floor(Math.min(st.clientWidth, st.clientHeight, 540)));
+    paper.style.width = paper.style.height = size + 'px';
+    const px = Math.round(size * DPR);
+    for (const c of [gC, iC, lC]) if (c.width !== px) c.width = c.height = px;
+    k = px / 320;
+  }
+
+  /* ---------- animasi ---------- */
+  function playGuide(play) {
+    cancelAnimationFrame(raf);
+    if (!play || reduce) { animT = 1; drawGuide(); return; }
+    const step = lesson().steps[sess().step];
+    const dur = step.kind === 'arsir' ? 1100 : Math.min(1900, Math.max(550, step.len * 3.2)), t0 = performance.now();
+    animT = 0;
+    const tick = now => { animT = Math.min(1, (now - t0) / dur); drawGuide(); if (animT < 1) raf = requestAnimationFrame(tick); };
+    raf = requestAnimationFrame(tick);
+  }
+  function settleFinish(animate) {
+    cancelAnimationFrame(raf); cancelAnimationFrame(eraseRaf); animT = 1;
+    const has = totals().n >= MIN_INK;
+    if (S.mode === 'kertas') { fade = 0; drawGuide(); return; }
+    if (!has) { fade = 1; conAlpha = 1; drawGuide(); drawInk(); return; }
+    if (!animate || reduce) { fade = 0; conAlpha = 0; drawGuide(); drawInk(); return; }
+    const t0 = performance.now(); fade = 1; conAlpha = 1;
+    const tick = now => {
+      const t = Math.min(1, (now - t0) / 1100);
+      fade = 1 - t; conAlpha = 1 - t;
+      drawGuide(); drawInk();
+      if (t < 1) eraseRaf = requestAnimationFrame(tick);
+    };
+    eraseRaf = requestAnimationFrame(tick);
+  }
+  function toast(text) {
+    const t = $('toast'); t.textContent = text;
+    t.classList.remove('show'); void t.offsetWidth; t.classList.add('show');
+  }
+
+  /* konfeti */
+  const cf = $('confetti'), cfX = cf.getContext('2d');
+  function confetti() {
+    if (reduce) return;
+    cf.width = innerWidth * DPR; cf.height = innerHeight * DPR;
+    const cols = [YELLOW, BLUE, '#e98b82', '#8cc84b', '#f6f1e4', '#9b6bd3'];
+    const r = paper.getBoundingClientRect(), ox = (r.left + r.width / 2) * DPR, oy = (r.top + r.height * .4) * DPR;
+    const ps = Array.from({ length: 90 }, () => {
+      const a = -Math.PI / 2 + (Math.random() - .5) * 2.2, v = (6 + Math.random() * 9) * DPR;
+      return { x: ox, y: oy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, r: Math.random() * 6.28, vr: (Math.random() - .5) * .4, w: (5 + Math.random() * 6) * DPR, c: cols[Math.random() * cols.length | 0] };
+    });
+    const t0 = performance.now();
+    const tick = now => {
+      const t = (now - t0) / 1800;
+      cfX.clearRect(0, 0, cf.width, cf.height);
+      if (t >= 1) return;
+      for (const p of ps) {
+        p.vy += .35 * DPR; p.vx *= .985; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        cfX.save(); cfX.translate(p.x, p.y); cfX.rotate(p.r); cfX.globalAlpha = 1 - t * t;
+        cfX.fillStyle = p.c; cfX.fillRect(-p.w / 2, -p.w / 4, p.w, p.w / 2); cfX.restore();
+      }
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }
+
+  /* ---------- alur langkah ---------- */
+  function enterStep(play) {
+    const ss = sess(), step = lesson().steps[ss.step];
+    cov = new Uint8Array(step.samples.length);
+    for (const s of ss.strokes) if (s.step === ss.step) {
+      let q = null;
+      for (const p of s.pts) { walk(q, p, 3, ip => mark(step, cov, ip)); q = p; }
+    }
+    playGuide(play);
+  }
+  function finishLesson() {
+    const L = lesson(), ss = sess();
+    ss.done = true; cov = null;
+    let got;
+    if (S.mode === 'kertas') got = Math.max(stars[L.id] || 0, 1);
+    else {
+      const t = totals();
+      got = t.n < MIN_INK ? 0 : (t.on / t.n >= .85 ? 3 : t.on / t.n >= .65 ? 2 : 1);
+      ss.earned = got;
+    }
+    if (got > (stars[L.id] || 0)) { stars[L.id] = got; bumpStars(); }
+    save();
+    if (got > 0 || S.mode === 'kertas') {
+      beep([[523, 0], [659, .1], [784, .2], [1046, .32, .35]]); buzz([20, 40, 30]);
+      setTimeout(confetti, 250);
+      paper.classList.remove('cheer'); void paper.offsetWidth; paper.classList.add('cheer');
+    }
+    settleFinish(true);
+  }
+  function advance(cheer) {
+    clearTimeout(autoT); dropLive();
+    const L = lesson(), ss = sess();
+    if (ss.done) return;
+    if (ss.step < L.steps.length - 1) {
+      if (cheer) { toast(CHEERS[Math.random() * CHEERS.length | 0]); beep([[660, 0], [880, .08]]); buzz(12); }
+      ss.step++; enterStep(true);
+    } else finishLesson();
+    paintDraw();
+  }
+  function select(i, fresh) {
+    clearTimeout(autoT); cancelAnimationFrame(raf); cancelAnimationFrame(eraseRaf); cancelAnimationFrame(replayRaf); dropLive();
+    coloring = false;
+    S.lesson = i;
+    const L = lesson();
+    lastId = L.id; level = L.lvl; save();
+    if (fresh) { delete S.sessions[L.id]; colorStore.delete(L.id); }
+    const ss = sess();
+    if (!(ss.step >= 0 && ss.step < L.steps.length) || !Array.isArray(ss.strokes)) { ss.step = 0; ss.done = false; ss.strokes = []; }
+    ruler.innerHTML = L.steps.map((s, j) => `<li class="k-${s.kind}"><i></i><b>${j + 1}</b></li>`).join('');
+    paper.classList.toggle('smp', isSmp(L));
+    loadColor();
+    resize();
+    conAlpha = ss.done ? 0 : 1;
+    drawInk();
+    if (ss.done) { cov = null; settleFinish(false); } else enterStep(true);
+    paintDraw();
+  }
+  function setMode(m) {
+    if (S.mode === m) return;
+    clearTimeout(autoT); dropLive();
+    S.mode = m; save();
+    if (sess().done) settleFinish(false); else drawGuide();
+    paintDraw();
+  }
+  const nextIndex = () => {
+    const L = lesson(), list = LESSONS.filter(x => x.lvl === L.lvl), j = list.indexOf(L);
+    return list[(j + 1) % list.length].index;
+  };
+  function bumpStars() {
+    for (const el of [$('star-total'), $('gal-stars')]) { el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+  }
+
+  /* ---------- tampilan menggambar ---------- */
+  const TECH = { garis: 'Garis utama', bantu: 'Garis bantu · tipis', arsir: 'Arsir' };
+  const HINT = {
+    layar: { garis: 'Telusuri garis biru. Langkah berganti sendiri.', bantu: 'Garis bantu nanti dihapus. Tarik tipis saja.', arsir: 'Gosok bolak-balik di area bergaris biru.' },
+    kertas: { garis: 'Tiru garis biru di kertasmu, lalu tekan Lanjut.', bantu: 'Tekan pensil pelan-pelan, nanti dihapus.', arsir: 'Arsir miring dengan pensil, lalu tekan Lanjut.' }
+  };
+  function paintRuler() {
+    const ss = sess(), L = lesson();
+    const f = (!ss.done && S.mode === 'layar' && cov) ? fraction(cov) / L.steps[ss.step].pass : 0;
+    [...ruler.children].forEach((li, i) => {
+      const past = ss.done || i < ss.step, now = !ss.done && i === ss.step;
+      li.className = `k-${L.steps[i].kind} ${past ? 'past' : now ? 'now' : ''}`;
+      li.firstElementChild.style.width = (past ? 100 : now ? Math.min(100, f * 100) : 0) + '%';
+    });
+  }
+  function paintDraw() {
+    const L = lesson(), ss = sess(), n = L.steps.length, pm = S.mode === 'kertas', cat = LEVELS[L.lvl].cats[L.cat];
+    paper.classList.toggle('is-kertas', pm && !coloring);
+    paper.classList.toggle('coloring', coloring);
+    $('mode-layar').setAttribute('aria-pressed', String(!pm));
+    $('mode-kertas').setAttribute('aria-pressed', String(pm));
+    $('draw-sub').textContent = `${LEVELS[L.lvl].name} · ${cat.name} · ${L.pos + 1}/12`;
+    $('draw-title').textContent = L.name;
+
+    $('panel-steps').hidden = ss.done || coloring;
+    $('panel-finish').hidden = !ss.done || coloring;
+    $('panel-color').hidden = !coloring;
+
+    if (!ss.done) {
+      const step = L.steps[ss.step];
+      $('kicker').textContent = `Langkah ${ss.step + 1} dari ${n}`;
+      const tech = $('tech');
+      tech.hidden = !isSmp(L); tech.className = 'tech ' + step.kind; tech.textContent = TECH[step.kind];
+      const h = $('instruction');
+      if (h.textContent !== step.say) { h.textContent = step.say; h.style.animation = 'none'; void h.offsetWidth; h.style.animation = ''; }
+      $('hint').textContent = HINT[pm ? 'kertas' : 'layar'][isSmp(L) ? step.kind : 'garis'];
+      const last = ss.strokes[ss.strokes.length - 1];
+      $('btn-undo').hidden = pm;
+      $('btn-undo').disabled = !(last && last.step === ss.step);
+      $('btn-skip').hidden = pm;
+      $('btn-next').hidden = !pm;
+      $('btn-next').textContent = ss.step === n - 1 ? 'Selesai' : 'Lanjut';
+    } else {
+      const t = totals(), best = stars[L.id] || 0;
+      const shown = pm ? best : (ss.earned ?? best);
+      let title, sub;
+      if (pm) { title = 'Selesai! Seberapa mirip?'; sub = 'Ketuk bintang untuk menilai gambar di kertasmu.'; }
+      else if (t.n < MIN_INK) { title = 'Kertasnya masih kosong.'; sub = 'Tekan Ulangi, lalu telusuri garis birunya.'; }
+      else {
+        title = ['Sudah jadi!', 'Sudah jadi!', 'Bagus sekali!', 'Luar biasa!'][shown];
+        sub = `${Math.round(100 * t.on / t.n)}% goresanmu pas di garis.` + (isSmp(L) ? ' Garis bantu sudah dihapus.' : '');
+      }
+      $('f-title').textContent = title; $('f-sub').textContent = sub;
+      const bs = $('bigstars');
+      bs.innerHTML = [1, 2, 3].map(i => pm
+        ? `<button type="button" id="rate-${i}" class="${i <= shown ? 'on' : ''}" aria-label="${i} bintang">${STAR}</button>`
+        : `<span class="${i <= shown ? 'on' : ''}">${STAR}</span>`).join('');
+      if (pm) bs.querySelectorAll('button').forEach((b, i) => b.addEventListener('click', () => {
+        stars[L.id] = i + 1; save(); bumpStars(); beep([[700 + i * 120, 0]]); paintDraw();
+      }));
+      $('btn-timelapse').hidden = pm || t.n < MIN_INK;
+      $('btn-nextlesson').textContent = `Berikutnya: ${LESSONS[nextIndex()].name}`;
+    }
+    paintRuler();
+    $('star-total').querySelector('b').textContent = totalStars();
+  }
+
+  /* ---------- mewarnai ---------- */
+  const N = 640, colorStore = new Map();
+  let mask = null, colorImg = null, colorUndo = [];
+  function loadColor() {
+    const id = lesson().id;
+    if (!colorStore.has(id)) colorStore.set(id, { img: new ImageData(N, N), undo: [] });
+    const c = colorStore.get(id);
+    colorImg = c.img; colorUndo = c.undo; mask = null;
+    coX.putImageData(colorImg, 0, 0);
+  }
+  function buildMask() {
+    const off = document.createElement('canvas'); off.width = off.height = N;
+    const x = off.getContext('2d', { willReadFrequently: true });
+    x.setTransform(N / 320, 0, 0, N / 320, 0, 0); x.lineCap = x.lineJoin = 'round'; x.strokeStyle = '#000'; x.lineWidth = 2.6;
+    for (const s of lesson().steps) if (s.kind === 'garis') for (const st of s.strokes) trace(x, st, st.len);
+    const d = x.getImageData(0, 0, N, N).data; mask = new Uint8Array(N * N);
+    for (let i = 0; i < N * N; i++) mask[i] = d[i * 4 + 3] > 60 ? 1 : 0;
+  }
+  function flood(px, py, hex) {
+    if (!mask) buildMask();
+    px = Math.max(0, Math.min(N - 1, px | 0)); py = Math.max(0, Math.min(N - 1, py | 0));
+    let i0 = py * N + px;
+    if (mask[i0]) {
+      let found = -1;
+      for (let r = 1; r <= 6 && found < 0; r++) for (let dy = -r; dy <= r && found < 0; dy++) for (let dx = -r; dx <= r; dx++) {
+        const x = px + dx, y = py + dy;
+        if (x >= 0 && y >= 0 && x < N && y < N && !mask[y * N + x]) { found = y * N + x; break; }
+      }
+      if (found < 0) return false;
+      i0 = found;
+    }
+    const seen = new Uint8Array(N * N), stack = new Int32Array(N * N); let sp = 0;
+    stack[sp++] = i0; seen[i0] = 1;
+    while (sp) {
+      const i = stack[--sp], x = i % N;
+      if (x > 0 && !seen[i - 1] && !mask[i - 1]) { seen[i - 1] = 1; stack[sp++] = i - 1; }
+      if (x < N - 1 && !seen[i + 1] && !mask[i + 1]) { seen[i + 1] = 1; stack[sp++] = i + 1; }
+      if (i >= N && !seen[i - N] && !mask[i - N]) { seen[i - N] = 1; stack[sp++] = i - N; }
+      if (i < N * N - N && !seen[i + N] && !mask[i + N]) { seen[i + N] = 1; stack[sp++] = i + N; }
+    }
+    for (let it = 2; it < 5; it++) {
+      for (let i = 0; i < N * N; i++) if (!seen[i] && mask[i]) {
+        const x = i % N;
+        if ((x > 0 && seen[i - 1] && seen[i - 1] < it) || (x < N - 1 && seen[i + 1] && seen[i + 1] < it) || (i >= N && seen[i - N] && seen[i - N] < it) || (i < N * N - N && seen[i + N] && seen[i + N] < it)) seen[i] = it;
+      }
+    }
+    colorUndo.push(colorImg.data.slice()); if (colorUndo.length > 12) colorUndo.shift();
+    const d = colorImg.data, erase = hex === null;
+    const r = erase ? 0 : parseInt(hex.slice(1, 3), 16), g = erase ? 0 : parseInt(hex.slice(3, 5), 16), b = erase ? 0 : parseInt(hex.slice(5, 7), 16);
+    for (let i = 0; i < N * N; i++) if (seen[i]) {
+      const j = i * 4;
+      if (erase) { d[j + 3] = 0; continue; }
+      const n = ((i * 2654435761) >>> 0) % 40;
+      d[j] = r; d[j + 1] = g; d[j + 2] = b; d[j + 3] = 205 + n;
+    }
+    coX.putImageData(colorImg, 0, 0);
+    return true;
+  }
+  function paintCrayons() {
+    const box = $('crayons');
+    if (!box.children.length) {
+      for (const [name, hex] of [...CRAYONS, ['Hapus warna', null]]) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'crayon' + (hex ? '' : ' erase'); b.setAttribute('aria-label', name);
+        if (hex) b.style.setProperty('--c', hex);
+        b.dataset.hex = hex || '';
+        b.addEventListener('click', () => { crayon = hex; paintCrayons(); beep([[620, 0, .05]]); });
+        box.append(b);
+      }
+    }
+    for (const b of box.children) b.setAttribute('aria-pressed', String((b.dataset.hex || null) === crayon));
+    $('btn-cundo').disabled = !colorUndo.length;
+  }
+  function enterColor() {
+    cancelAnimationFrame(replayRaf); coloring = true; dropLive();
+    if (sess().done) settleFinish(false);
+    paintCrayons(); paintDraw();
+  }
+
+  /* ---------- putar ulang ---------- */
+  function timelapse() {
+    const strokes = sess().strokes; if (!strokes.length) return;
+    cancelAnimationFrame(replayRaf); cancelAnimationFrame(eraseRaf);
+    const total = strokes.reduce((a, s) => a + s.pts.length, 0);
+    const dur = reduce ? 0 : Math.min(6000, 1500 + total * 3), t0 = performance.now();
+    conAlpha = 1;
+    const tick = now => {
+      const t = dur ? Math.min(1, (now - t0) / dur) : 1;
+      drawInk(Math.ceil(total * t));
+      if (t < 1) replayRaf = requestAnimationFrame(tick);
+      else if (isSmp(lesson())) settleFinish(true);
+      else conAlpha = 0;
+    };
+    replayRaf = requestAnimationFrame(tick);
+  }
+
+  /* ---------- goresan jari ---------- */
+  const toPt = e => {
+    const r = lC.getBoundingClientRect();
+    return [Math.round((e.clientX - r.left) * 3200 / r.width) / 10, Math.round((e.clientY - r.top) * 3200 / r.height) / 10];
+  };
+  function feed(st, p, q) {
+    const L = lesson(), ss = sess(), step = L.steps[ss.step];
+    walk(q, p, 3, ip => {
+      st.n++;
+      let hit = mark(step, cov, ip);
+      for (let i = 0; i < ss.step && !hit; i++) hit = near(L.steps[i], ip);
+      if (hit) st.on++;
+    });
+  }
+  lC.addEventListener('pointerdown', e => {
+    if (coloring) {
+      e.preventDefault();
+      const r = lC.getBoundingClientRect();
+      if (flood((e.clientX - r.left) * N / r.width, (e.clientY - r.top) * N / r.height, crayon)) { beep([[480 + Math.random() * 200, 0, .09]]); buzz(8); }
+      paintCrayons();
+      return;
+    }
+    const ss = sess();
+    if (S.mode !== 'layar' || ss.done || active !== null || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    e.preventDefault(); clearTimeout(autoT);
+    active = e.pointerId;
+    try { lC.setPointerCapture(active); } catch {}
+    const p = toPt(e);
+    cur = { pts: [p], step: ss.step, n: 0, on: 0 };
+    feed(cur, p, null); drawLive(); paintRuler();
+  });
+  lC.addEventListener('pointermove', e => {
+    if (e.pointerId !== active || !cur) return;
+    e.preventDefault();
+    const co = e.getCoalescedEvents ? e.getCoalescedEvents() : [];
+    for (const ev of (co.length ? co : [e])) {
+      const p = toPt(ev), q = cur.pts[cur.pts.length - 1];
+      if (dist(p, q) < 1) continue;
+      feed(cur, p, q); cur.pts.push(p);
+    }
+    drawLive(); paintRuler();
+  });
+  const endStroke = e => {
+    if (e.pointerId !== active || !cur) return;
+    const ss = sess(), step = lesson().steps[ss.step];
+    ss.strokes.push(cur);
+    dropLive(); drawInk(); drawGuide(); paintDraw();
+    if (fraction(cov) >= step.pass) autoT = setTimeout(() => advance(true), 650);
+  };
+  lC.addEventListener('pointerup', endStroke);
+  lC.addEventListener('pointercancel', endStroke);
+
+  /* ---------- tombol menggambar ---------- */
+  $('btn-undo').addEventListener('click', () => {
+    const ss = sess(), last = ss.strokes[ss.strokes.length - 1];
+    if (!last || last.step !== ss.step) return;
+    clearTimeout(autoT); ss.strokes.pop();
+    drawInk(); enterStep(false); paintDraw();
+  });
+  $('btn-replay').addEventListener('click', () => { if (!sess().done) playGuide(true); });
+  $('btn-skip').addEventListener('click', () => advance(false));
+  $('btn-next').addEventListener('click', () => advance(true));
+  $('btn-redo').addEventListener('click', () => select(S.lesson, true));
+  $('btn-nextlesson').addEventListener('click', () => { const i = nextIndex(); select(i, !!S.sessions[LESSONS[i].id]?.done); });
+  $('btn-color').addEventListener('click', enterColor);
+  $('btn-timelapse').addEventListener('click', timelapse);
+  $('btn-cundo').addEventListener('click', () => { const p = colorUndo.pop(); if (p) { colorImg.data.set(p); coX.putImageData(colorImg, 0, 0); } paintCrayons(); });
+  $('btn-cdone').addEventListener('click', () => { coloring = false; paintDraw(); });
+  $('mode-layar').addEventListener('click', () => setMode('layar'));
+  $('mode-kertas').addEventListener('click', () => setMode('kertas'));
+  $('btn-back').addEventListener('click', () => { coloring = false; openGallery(lesson().lvl, lesson().cat); });
+
+  /* ---------- beranda ---------- */
+  function catStats(lv, ci) {
+    const items = catLessons(lv, ci); let done = 0, st = 0;
+    for (const L of items) { const s = stars[L.id] || 0; if (s) done++; st += s; }
+    return { done, st, n: items.length };
+  }
+  function paintHome() {
+    const lv = LEVELS[level];
+    $('levels').classList.toggle('smp', level === 1);
+    document.body.classList.toggle('smp-on', level === 1);
+    $('lvl-sd').setAttribute('aria-selected', String(level === 0));
+    $('lvl-smp').setAttribute('aria-selected', String(level === 1));
+    $('lvl-desc').textContent = lv.desc;
+    $('star-total').querySelector('b').textContent = totalStars();
+    $('btn-sound').setAttribute('aria-pressed', String(soundOn));
+    $('btn-sound').innerHTML = `<svg><use href="#${soundOn ? 'i-sound' : 'i-mute'}"/></svg>`;
+
+    const last = LESSONS.find(L => L.id === lastId && L.lvl === level);
+    $('cont').hidden = !last;
+    if (last) {
+      thumb($('cont-thumb'), last, 52, 9);
+      $('cont-thumb').style.background = isSmp(last) ? 'var(--sketch)' : 'var(--paper)';
+      $('cont-label').textContent = `Lanjutkan · ${lv.cats[last.cat].name}`;
+      $('cont-name').textContent = last.name;
+    }
+    const box = $('cats'); box.replaceChildren();
+    lv.cats.forEach((cat, ci) => {
+      const { done, st, n } = catStats(level, ci);
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'cat'; b.id = `cat-${lv.id}-${cat.id}`;
+      b.innerHTML = `<span class="collage"><canvas></canvas><canvas></canvas><canvas></canvas></span>
+        <span class="cat-body"><h3></h3><span class="bar"><i></i></span>
+        <span class="cat-meta"><span>${done} dari ${n} selesai</span><span><svg viewBox="0 0 24 24"><use href="#i-star"/></svg>${st}/${n * 3}</span></span></span>`;
+      b.querySelector('h3').textContent = cat.name;
+      b.querySelectorAll('canvas').forEach((c, j) => thumb(c, cat.items[[0, 4, 8][j]], 54, 9));
+      b.style.animation = `pop .4s ${ci * 0.05}s cubic-bezier(.3,1.4,.5,1) backwards`;
+      b.addEventListener('click', () => openGallery(level, ci));
+      box.append(b);
+      requestAnimationFrame(() => requestAnimationFrame(() => { b.querySelector('.bar i').style.width = (done / n * 100) + '%'; }));
+    });
+  }
+  function setLevel(l) {
+    if (level === l) return;
+    level = l; save(); beep([[l ? 560 : 480, 0, .08]]); paintHome();
+  }
+  $('lvl-sd').addEventListener('click', () => setLevel(0));
+  $('lvl-smp').addEventListener('click', () => setLevel(1));
+  $('btn-sound').addEventListener('click', () => { soundOn = !soundOn; save(); paintHome(); beep([[660, 0, .08]]); });
+  $('cont').addEventListener('click', () => { const L = LESSONS.find(x => x.id === lastId); if (L) openDraw(L.index); });
+
+  /* ---------- galeri ---------- */
+  const cardCache = new Map();
+  function openGallery(lv, ci) {
+    level = lv; S.galCat = ci; save();
+    document.body.classList.toggle('smp-on', lv === 1);
+    show('gallery');
+    const tabs = $('tabs'); tabs.replaceChildren();
+    LEVELS[lv].cats.forEach((cat, j) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.role = 'tab'; b.id = `tab-${cat.id}`; b.textContent = cat.name;
+      b.setAttribute('aria-selected', String(j === ci));
+      b.addEventListener('click', () => { if (j !== S.galCat) { beep([[520, 0, .05]]); openGallery(lv, j); } });
+      tabs.append(b);
+    });
+    tabs.children[ci].scrollIntoView?.({ block: 'nearest', inline: 'center' });
+    const cat = LEVELS[lv].cats[ci], { done } = catStats(lv, ci);
+    $('gal-sub').textContent = `${LEVELS[lv].name} · ${done} dari 12 selesai`;
+    $('gal-title').textContent = cat.name;
+    $('gal-stars').querySelector('b').textContent = totalStars();
+    const grid = $('grid'); grid.replaceChildren();
+    cat.items.forEach((L, j) => {
+      if (!cardCache.has(L.id)) {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'card'; b.id = 'card-' + L.id;
+        const c = document.createElement('canvas'); thumb(c, L, 130, 6);
+        const name = document.createElement('b'); name.textContent = L.name;
+        const meta = document.createElement('small');
+        b.append(c, name, meta);
+        b.addEventListener('click', () => { beep([[600, 0, .06]]); openDraw(L.index); });
+        cardCache.set(L.id, b);
+      }
+      const b = cardCache.get(L.id);
+      b.querySelector('small').innerHTML = `${L.steps.length} langkah ${starRow(stars[L.id] || 0)}`;
+      b.querySelector('small').style.cssText = 'display:flex;align-items:center;gap:6px';
+      if (L.index === S.lesson && S.sessions[L.id]) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
+      b.style.animationDelay = (j * 0.025) + 's';
+      b.style.animationName = 'none'; void b.offsetWidth; b.style.animationName = '';
+      grid.append(b);
+    });
+  }
+  $('gal-back').addEventListener('click', () => show('home'));
+
+  /* ---------- pindah layar ---------- */
+  function show(name) {
+    S.screen = name;
+    for (const s of ['home', 'gallery', 'draw']) {
+      const el = $('screen-' + s);
+      el.hidden = s !== name;
+      el.classList.toggle('on', s === name);
+    }
+    if (name === 'home') paintHome();
+    window.scrollTo(0, 0);
+  }
+  function openDraw(i) {
+    show('draw');
+    const L = LESSONS[i];
+    select(i, !!S.sessions[L.id]?.done);
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (S.screen === 'draw') $('btn-back').click(); else if (S.screen === 'gallery') show('home');
+  });
+
+  /* ---------- mulai ---------- */
+  function start(data) {
+    data = data || {};
+    if (data.sessions && typeof data.sessions === 'object') S.sessions = data.sessions;
+    if (data.mode === 'kertas' || data.mode === 'layar') S.mode = data.mode;
+    new ResizeObserver(() => { if (S.screen !== 'draw') return; resize(); drawInk(); drawGuide(); }).observe($('stage'));
+    const L = LESSONS.find(x => x.id === data.lessonId);
+    if (data.screen === 'draw' && L) openDraw(L.index);
+    else if (data.screen === 'gallery' && Number.isInteger(data.lvl) && LEVELS[data.lvl]?.cats[data.galCat]) openGallery(data.lvl, data.galCat);
+    else show('home');
+  }
+  window.claude?.hot?.snapshot?.(() => ({ lessonId: lesson().id, mode: S.mode, sessions: S.sessions, screen: S.screen, lvl: level, galCat: S.galCat }));
+  if (window.claude?.hot?.ready) window.claude.hot.ready(start);
+  else start(window.claude?.hot?.data ?? {});
+})();
+</script>
+</body>
+</html>
